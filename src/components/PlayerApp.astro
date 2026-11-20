@@ -1,0 +1,1220 @@
+---
+// src/components/PlayerApp.astro
+// Core distraction-free YouTube player application island
+---
+
+<div id="tubecalm-app" class="w-full">
+  <!-- 1. Top URL Input Bar -->
+  <section class="relative mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
+    <div class="rounded-xl border border-hairline bg-canvas-elevated p-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all sm:p-2.5">
+      <form id="url-form" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <!-- Input Field Container -->
+        <div class="relative flex flex-1 items-center">
+          <div class="pointer-events-none absolute left-3 text-mute">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <input
+            id="url-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Paste any YouTube video or playlist link..."
+            class="h-10 w-full rounded-[6px] bg-transparent pl-9 pr-20 text-[14px] text-ink placeholder:text-faint focus:outline-none"
+            aria-label="YouTube Video or Playlist URL"
+          />
+          <!-- Paste from clipboard button -->
+          <button
+            id="paste-btn"
+            type="button"
+            class="absolute right-2 inline-flex h-7 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[11px] font-mono font-medium text-mute transition-colors hover:border-body/40 hover:text-ink"
+            title="Paste from clipboard"
+          >
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Paste
+          </button>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="play-submit-btn"
+          class="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-ink px-5 text-[14px] font-medium text-canvas-elevated shadow-sm transition-opacity hover:opacity-90 active:scale-[0.98] sm:w-auto"
+        >
+          <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Watch Now
+        </button>
+      </form>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="mt-2 hidden rounded-lg border border-red-200 bg-red-50/80 px-3 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+      <div class="flex items-center gap-2">
+        <svg class="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4M12 16h.01" />
+        </svg>
+        <span id="error-message">Invalid link format.</span>
+      </div>
+    </div>
+
+    <!-- Curated Sample Links -->
+    <div class="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
+      <span class="font-mono text-[11px] uppercase tracking-wider text-mute">Samples:</span>
+      <button type="button" class="sample-link rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] text-body transition-colors hover:border-ink/30 hover:text-ink" data-url="https://www.youtube.com/watch?v=jfKfPfyJRdk">
+        ☕ Lofi Study Beats
+      </button>
+      <button type="button" class="sample-link rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] text-body transition-colors hover:border-ink/30 hover:text-ink" data-url="https://www.youtube.com/watch?v=8X2kIfS6fb8">
+        💻 Deep Work Ambient
+      </button>
+      <button type="button" class="sample-link rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] text-body transition-colors hover:border-ink/30 hover:text-ink" data-url="https://www.youtube.com/watch?v=WPni755-Krg">
+        🌧️ Nature & Rain
+      </button>
+      <button type="button" class="sample-link rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] text-body transition-colors hover:border-ink/30 hover:text-ink" data-url="https://www.youtube.com/watch?v=4xDzrJKXOOY">
+        🎹 Classical Piano
+      </button>
+    </div>
+  </section>
+
+  <!-- 2. Interactive Player View Container (Shown when a video is loaded) -->
+  <section id="player-section" class="mx-auto mt-6 hidden w-full px-4 transition-all duration-300 sm:px-6">
+    <div id="player-container-wrapper" class="mx-auto max-w-4xl transition-all duration-300">
+      
+      <!-- Ambient Glow (Active in Cinema Mode) -->
+      <div id="ambient-glow" class="pointer-events-none absolute -inset-4 -z-10 hidden rounded-3xl opacity-30 blur-2xl transition-all duration-500 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-purple-600/30"></div>
+
+      <!-- Player Frame -->
+      <div class="relative aspect-video w-full overflow-hidden rounded-xl border border-hairline bg-black shadow-[0_4px_20px_rgba(0,0,0,0.12)]">
+        <!-- Loading Skeleton -->
+        <div id="player-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 text-white z-10 transition-opacity">
+          <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+          <span class="mt-3 font-mono text-[12px] text-white/60">Loading distraction-free player...</span>
+        </div>
+
+        <!-- YouTube IFrame Target Container -->
+        <div id="yt-player-target" class="h-full w-full"></div>
+      </div>
+
+      <!-- Player Controls & Metadata Bar -->
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-hairline bg-canvas-elevated p-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <!-- Left: Quick Video Controls -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <!-- Play / Pause -->
+          <button
+            id="ctrl-play-pause"
+            type="button"
+            class="flex h-8 items-center gap-1.5 rounded-[6px] border border-hairline bg-canvas px-2.5 text-[12px] font-medium text-ink hover:bg-hairline-soft"
+            title="Play / Pause (Space or k)"
+          >
+            <svg id="icon-play" class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg id="icon-pause" class="hidden h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+            <span id="play-pause-label">Play</span>
+          </button>
+
+          <!-- Rewind 10s -->
+          <button
+            id="ctrl-rewind"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-body hover:text-ink hover:bg-hairline-soft"
+            title="Rewind 10s (Left Arrow or j)"
+          >
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+            </svg>
+            -10s
+          </button>
+
+          <!-- Skip 10s -->
+          <button
+            id="ctrl-forward"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-body hover:text-ink hover:bg-hairline-soft"
+            title="Forward 10s (Right Arrow or l)"
+          >
+            +10s
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+            </svg>
+          </button>
+
+          <!-- Speed Dropdown -->
+          <div class="relative inline-block">
+            <select
+              id="ctrl-speed"
+              class="h-8 appearance-none rounded-[6px] border border-hairline bg-canvas pl-2 pr-6 text-[12px] font-mono text-body hover:text-ink focus:outline-none"
+              title="Playback Speed"
+            >
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1.0×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="1.75">1.75×</option>
+              <option value="2">2.0×</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-mute">
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Loop Toggle -->
+          <button
+            id="ctrl-loop"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-mute hover:text-ink hover:bg-hairline-soft"
+            title="Toggle Loop"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span id="loop-label">Loop</span>
+          </button>
+        </div>
+
+        <!-- Right: Layout & Display Options -->
+        <div class="flex items-center gap-1.5">
+          <!-- Theater Mode -->
+          <button
+            id="ctrl-theater"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-mute hover:text-ink hover:bg-hairline-soft"
+            title="Theater Mode (t)"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="M7 15h10" />
+            </svg>
+            Theater
+          </button>
+
+          <!-- Cinema Dimmer -->
+          <button
+            id="ctrl-cinema"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-mute hover:text-ink hover:bg-hairline-soft"
+            title="Cinema Ambient Dimmer (c)"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Cinema
+          </button>
+
+          <!-- Share Clean Link -->
+          <button
+            id="ctrl-share"
+            type="button"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-mute hover:text-ink hover:bg-hairline-soft"
+            title="Copy Clean Distraction-Free Link"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span id="share-label">Share</span>
+          </button>
+
+          <!-- Open in YouTube -->
+          <a
+            id="ctrl-open-yt"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex h-8 items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2 text-[12px] font-mono text-mute hover:text-ink hover:bg-hairline-soft"
+            title="Open in native YouTube"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            YouTube
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. Productivity Dock (Focus Timer + Video Notes + Local History) -->
+      <div class="mt-6 rounded-xl border border-hairline bg-canvas-elevated p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <!-- Tab Navigation -->
+        <div class="flex items-center justify-between border-b border-hairline pb-3">
+          <div class="flex items-center gap-2">
+            <button
+              id="tab-btn-timer"
+              type="button"
+              class="dock-tab active flex items-center gap-1.5 rounded-full border border-hairline bg-hairline-soft px-3 py-1 text-[12px] font-medium text-ink"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              Focus Session
+            </button>
+            <button
+              id="tab-btn-notes"
+              type="button"
+              class="dock-tab flex items-center gap-1.5 rounded-full border border-hairline bg-canvas px-3 py-1 text-[12px] font-normal text-body hover:text-ink"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Video Notes
+            </button>
+            <button
+              id="tab-btn-history"
+              type="button"
+              class="dock-tab flex items-center gap-1.5 rounded-full border border-hairline bg-canvas px-3 py-1 text-[12px] font-normal text-body hover:text-ink"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Recent Watch History
+            </button>
+          </div>
+          <span class="font-mono text-[11px] text-mute hidden sm:inline-block">100% Private (Saved locally on device)</span>
+        </div>
+
+        <!-- Tab 1: Focus Session (Pomodoro) -->
+        <div id="dock-panel-timer" class="pt-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h4 class="text-[14px] font-medium text-ink">Deep Work Focus Session</h4>
+              <p class="text-[12px] text-mute">Set an intentional duration to watch your lecture or study session without getting pulled away.</p>
+            </div>
+            <!-- Preset Pills -->
+            <div class="flex items-center gap-1.5">
+              <button type="button" class="timer-preset rounded-[6px] border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-body hover:text-ink" data-minutes="15">15m</button>
+              <button type="button" class="timer-preset rounded-[6px] border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-body hover:text-ink" data-minutes="25">25m (Pomodoro)</button>
+              <button type="button" class="timer-preset rounded-[6px] border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-body hover:text-ink" data-minutes="45">45m</button>
+              <button type="button" class="timer-preset rounded-[6px] border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-body hover:text-ink" data-minutes="60">60m</button>
+            </div>
+          </div>
+
+          <!-- Timer Display & Controls -->
+          <div class="mt-4 flex items-center gap-4">
+            <div class="rounded-lg border border-hairline bg-canvas px-4 py-2 font-mono text-2xl font-semibold text-ink" id="timer-display">
+              25:00
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="timer-toggle-btn"
+                type="button"
+                class="rounded-[6px] bg-ink px-3 py-1.5 text-[12px] font-medium text-canvas-elevated hover:opacity-90"
+              >
+                Start Timer
+              </button>
+              <button
+                id="timer-reset-btn"
+                type="button"
+                class="rounded-[6px] border border-hairline bg-canvas px-3 py-1.5 text-[12px] font-medium text-body hover:text-ink"
+              >
+                Reset
+              </button>
+            </div>
+            <span id="timer-status" class="font-mono text-[11px] text-mute">Ready</span>
+          </div>
+        </div>
+
+        <!-- Tab 2: Timestamped Notes -->
+        <div id="dock-panel-notes" class="hidden pt-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h4 class="text-[14px] font-medium text-ink">Timestamped Notes</h4>
+              <p class="text-[12px] text-mute">Take notes while watching. Insert timestamps you can click later to jump right back.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="insert-timestamp-btn"
+                type="button"
+                class="inline-flex items-center gap-1 rounded-[6px] border border-hairline bg-canvas px-2.5 py-1 text-[12px] font-mono font-medium text-ink hover:bg-hairline-soft"
+                title="Insert current video timestamp"
+              >
+                <svg class="h-3.5 w-3.5 text-mute" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Insert <span id="current-ts-label">[0:00]</span>
+              </button>
+              <button
+                id="copy-notes-btn"
+                type="button"
+                class="rounded-[6px] border border-hairline bg-canvas px-2.5 py-1 text-[12px] font-medium text-body hover:text-ink"
+              >
+                Copy Notes
+              </button>
+            </div>
+          </div>
+          <!-- Textarea -->
+          <div class="mt-3">
+            <textarea
+              id="notes-textarea"
+              rows="4"
+              placeholder="Write your notes here... Timestamps like [02:30] or [14:15] will become clickable shortcuts in the preview!"
+              class="w-full rounded-lg border border-hairline bg-canvas p-3 text-[13px] text-ink placeholder:text-faint focus:outline-none focus:border-body/40"
+            ></textarea>
+          </div>
+          <!-- Rendered clickable timestamps preview -->
+          <div id="notes-preview-container" class="mt-2 hidden">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-mute">Clickable Jump Points:</span>
+            <div id="notes-timestamps-list" class="mt-1 flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Local Watch History -->
+        <div id="dock-panel-history" class="hidden pt-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-[14px] font-medium text-ink">Recent Local History</h4>
+              <p class="text-[12px] text-mute">Your recent videos are kept only in your browser storage. Never uploaded to any server.</p>
+            </div>
+            <button
+              id="clear-history-btn"
+              type="button"
+              class="rounded-[6px] border border-hairline bg-canvas px-2.5 py-1 text-[11px] font-mono text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+            >
+              Clear History
+            </button>
+          </div>
+          <div id="history-list" class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            <!-- Dynamically populated -->
+          </div>
+          <div id="history-empty" class="py-6 text-center font-mono text-[12px] text-mute">
+            No history yet. Videos you watch will appear here for fast re-access.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Keyboard Shortcuts Cheat-sheet Modal -->
+  <dialog id="shortcuts-modal" class="rounded-xl border border-hairline bg-canvas-elevated p-6 text-ink shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm max-w-md w-full">
+    <div class="flex items-center justify-between border-b border-hairline pb-3">
+      <h3 class="text-[16px] font-semibold tracking-[-0.4px] text-ink">Keyboard Shortcuts</h3>
+      <button id="close-shortcuts-modal" class="rounded-[6px] border border-hairline bg-canvas p-1 text-mute hover:text-ink" aria-label="Close modal">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="mt-4 space-y-2 text-[13px]">
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Play / Pause</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">Space</kbd> or <kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">k</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Rewind 10 seconds</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">←</kbd> or <kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">j</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Forward 10 seconds</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">→</kbd> or <kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">l</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Mute / Unmute</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">m</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Theater Mode</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">t</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Cinema Ambient Dimmer</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">c</kbd></span>
+      </div>
+      <div class="flex items-center justify-between py-1 border-b border-hairline/60">
+        <span class="text-body">Toggle Shortcuts Sheet</span>
+        <span class="font-mono text-[11px] text-mute"><kbd class="rounded border border-hairline bg-canvas px-1.5 py-0.5">?</kbd></span>
+      </div>
+    </div>
+    <div class="mt-5 text-right">
+      <button id="modal-done-btn" class="rounded-full bg-ink px-4 py-1.5 text-[12px] font-medium text-canvas-elevated hover:opacity-90">
+        Got it
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="pointer-events-none fixed bottom-6 right-6 z-50 flex translate-y-10 items-center gap-2 rounded-lg border border-hairline bg-canvas-elevated px-4 py-2.5 text-[13px] text-ink opacity-0 shadow-lg transition-all duration-300">
+    <svg class="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toast-message">Clean link copied!</span>
+  </div>
+</div>
+
+<script>
+  import { parseYouTubeUrl, formatTime } from '../utils/youtube.js';
+
+  // State Management
+  let ytPlayer = null;
+  let isApiReady = false;
+  let currentVideoId = null;
+  let currentPlaylistId = null;
+  let isLooping = false;
+  let isTheater = false;
+  let isCinema = false;
+  let timerInterval = null;
+  let timerRemainingSeconds = 25 * 60;
+  let isTimerRunning = false;
+
+  // DOM Elements
+  const form = document.getElementById('url-form');
+  const input = document.getElementById('url-input');
+  const pasteBtn = document.getElementById('paste-btn');
+  const errorBanner = document.getElementById('error-banner');
+  const errorMessage = document.getElementById('error-message');
+  const playerSection = document.getElementById('player-section');
+  const playerLoading = document.getElementById('player-loading');
+  const playerContainerWrapper = document.getElementById('player-container-wrapper');
+  const ambientGlow = document.getElementById('ambient-glow');
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toast-message');
+
+  // Controls Elements
+  const playPauseBtn = document.getElementById('ctrl-play-pause');
+  const iconPlay = document.getElementById('icon-play');
+  const iconPause = document.getElementById('icon-pause');
+  const playPauseLabel = document.getElementById('play-pause-label');
+  const rewindBtn = document.getElementById('ctrl-rewind');
+  const forwardBtn = document.getElementById('ctrl-forward');
+  const speedSelect = document.getElementById('ctrl-speed');
+  const loopBtn = document.getElementById('ctrl-loop');
+  const loopLabel = document.getElementById('loop-label');
+  const theaterBtn = document.getElementById('ctrl-theater');
+  const cinemaBtn = document.getElementById('ctrl-cinema');
+  const shareBtn = document.getElementById('ctrl-share');
+  const openYtLink = document.getElementById('ctrl-open-yt');
+
+  // Productivity Dock Elements
+  const tabTimer = document.getElementById('tab-btn-timer');
+  const tabNotes = document.getElementById('tab-btn-notes');
+  const tabHistory = document.getElementById('tab-btn-history');
+  const panelTimer = document.getElementById('dock-panel-timer');
+  const panelNotes = document.getElementById('dock-panel-notes');
+  const panelHistory = document.getElementById('dock-panel-history');
+
+  const timerDisplay = document.getElementById('timer-display');
+  const timerToggleBtn = document.getElementById('timer-toggle-btn');
+  const timerResetBtn = document.getElementById('timer-reset-btn');
+  const timerStatus = document.getElementById('timer-status');
+  const timerPresets = document.querySelectorAll('.timer-preset');
+
+  const notesTextarea = document.getElementById('notes-textarea');
+  const insertTsBtn = document.getElementById('insert-timestamp-btn');
+  const currentTsLabel = document.getElementById('current-ts-label');
+  const copyNotesBtn = document.getElementById('copy-notes-btn');
+  const notesPreviewContainer = document.getElementById('notes-preview-container');
+  const notesTimestampsList = document.getElementById('notes-timestamps-list');
+
+  const historyList = document.getElementById('history-list');
+  const historyEmpty = document.getElementById('history-empty');
+  const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+  const shortcutsBtn = document.getElementById('shortcuts-btn');
+  const shortcutsModal = document.getElementById('shortcuts-modal');
+  const closeShortcutsModal = document.getElementById('close-shortcuts-modal');
+  const modalDoneBtn = document.getElementById('modal-done-btn');
+
+  // Show Toast
+  function showToast(msg) {
+    if (!toast || !toastMessage) return;
+    toastMessage.textContent = msg;
+    toast.classList.remove('translate-y-10', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-10', 'opacity-0');
+    }, 2400);
+  }
+
+  // Load YouTube IFrame API
+  function initYouTubeApi() {
+    if (window.YT && window.YT.Player) {
+      isApiReady = true;
+      checkUrlParamsAndLoad();
+      return;
+    }
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      isApiReady = true;
+      checkUrlParamsAndLoad();
+    };
+  }
+
+  // Create or Update YouTube Player instance
+  function loadVideoOrPlaylist(parsed) {
+    if (!parsed.isValid) {
+      showError(parsed.error || 'Invalid link.');
+      return;
+    }
+
+    hideError();
+    currentVideoId = parsed.videoId;
+    currentPlaylistId = parsed.playlistId;
+
+    // Show player section and scroll smoothly into view
+    playerSection.classList.remove('hidden');
+    playerLoading.classList.remove('opacity-0', 'pointer-events-none');
+    playerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Update Open on YouTube Link
+    if (openYtLink) {
+      openYtLink.href = parsed.cleanUrl;
+    }
+
+    // Save to Local History
+    saveToHistory(parsed);
+
+    // Load Notes for this video
+    loadNotes(currentVideoId);
+
+    // Update Browser URL cleanly without reloading page
+    const newUrl = new URL(window.location.href);
+    if (parsed.videoId) newUrl.searchParams.set('v', parsed.videoId);
+    else newUrl.searchParams.delete('v');
+
+    if (parsed.playlistId) newUrl.searchParams.set('list', parsed.playlistId);
+    else newUrl.searchParams.delete('list');
+
+    if (parsed.startTime > 0) newUrl.searchParams.set('t', parsed.startTime.toString());
+    else newUrl.searchParams.delete('t');
+
+    window.history.replaceState({}, '', newUrl.toString());
+
+    // If player already exists, cue/load new target
+    if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+      try {
+        if (parsed.type === 'playlist') {
+          ytPlayer.loadPlaylist({
+            list: parsed.playlistId,
+            listType: 'playlist',
+            index: 0,
+            startSeconds: 0
+          });
+        } else if (parsed.type === 'video-in-playlist') {
+          ytPlayer.loadVideoById({
+            videoId: parsed.videoId,
+            startSeconds: parsed.startTime || 0
+          });
+        } else {
+          ytPlayer.loadVideoById({
+            videoId: parsed.videoId,
+            startSeconds: parsed.startTime || 0
+          });
+        }
+        playerLoading.classList.add('opacity-0', 'pointer-events-none');
+        return;
+      } catch (e) {
+        console.warn('Reloading YT player instance', e);
+      }
+    }
+
+    // Otherwise instantiate new YT.Player
+    const playerConfig = {
+      playerVars: {
+        autoplay: 1,
+        enablejsapi: 1,
+        modestbranding: 1,
+        rel: 0,
+        iv_load_policy: 3,
+        playsinline: 1,
+        origin: window.location.origin
+      },
+      events: {
+        onReady: (event) => {
+          playerLoading.classList.add('opacity-0', 'pointer-events-none');
+          updatePlayPauseUI(true);
+        },
+        onStateChange: (event) => {
+          // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 video cued
+          if (event.data === 1) {
+            updatePlayPauseUI(true);
+          } else if (event.data === 2) {
+            updatePlayPauseUI(false);
+          } else if (event.data === 0) {
+            updatePlayPauseUI(false);
+            if (isLooping && ytPlayer) {
+              ytPlayer.seekTo(0);
+              ytPlayer.playVideo();
+            }
+          }
+        },
+        onError: (err) => {
+          playerLoading.classList.add('opacity-0', 'pointer-events-none');
+          showError('YouTube reported an issue embedding this video (code: ' + err.data + '). It may have embed restrictions.');
+        }
+      }
+    };
+
+    if (parsed.type === 'playlist') {
+      playerConfig.playerVars.listType = 'playlist';
+      playerConfig.playerVars.list = parsed.playlistId;
+    } else {
+      playerConfig.videoId = parsed.videoId;
+      if (parsed.startTime > 0) playerConfig.playerVars.start = parsed.startTime;
+      if (parsed.playlistId) playerConfig.playerVars.list = parsed.playlistId;
+    }
+
+    ytPlayer = new window.YT.Player('yt-player-target', playerConfig);
+  }
+
+  function updatePlayPauseUI(isPlaying) {
+    if (!iconPlay || !iconPause || !playPauseLabel) return;
+    if (isPlaying) {
+      iconPlay.classList.add('hidden');
+      iconPause.classList.remove('hidden');
+      playPauseLabel.textContent = 'Pause';
+    } else {
+      iconPlay.classList.remove('hidden');
+      iconPause.classList.add('hidden');
+      playPauseLabel.textContent = 'Play';
+    }
+  }
+
+  function showError(msg) {
+    if (errorBanner && errorMessage) {
+      errorMessage.textContent = msg;
+      errorBanner.classList.remove('hidden');
+    }
+  }
+
+  function hideError() {
+    if (errorBanner) errorBanner.classList.add('hidden');
+  }
+
+  // URL Form Submission
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = input ? input.value : '';
+      if (!val) {
+        showError('Please paste a YouTube video or playlist link.');
+        return;
+      }
+      const parsed = parseYouTubeUrl(val);
+      if (!parsed.isValid) {
+        showError(parsed.error);
+        return;
+      }
+      loadVideoOrPlaylist(parsed);
+    });
+  }
+
+  // Paste from clipboard button
+  if (pasteBtn && input) {
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          input.value = text;
+          const parsed = parseYouTubeUrl(text);
+          if (parsed.isValid) {
+            loadVideoOrPlaylist(parsed);
+          }
+        }
+      } catch (err) {
+        showToast('Please press Ctrl+V / Cmd+V to paste');
+      }
+    });
+  }
+
+  // Curated Sample Links
+  document.querySelectorAll('.sample-link').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const url = btn.getAttribute('data-url');
+      if (input && url) {
+        input.value = url;
+        const parsed = parseYouTubeUrl(url);
+        loadVideoOrPlaylist(parsed);
+      }
+    });
+  });
+
+  // Play / Pause Button
+  if (playPauseBtn) {
+    playPauseBtn.addEventListener('click', () => {
+      if (!ytPlayer) return;
+      const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+      if (state === 1) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    });
+  }
+
+  // Rewind 10s
+  if (rewindBtn) {
+    rewindBtn.addEventListener('click', () => {
+      if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+      const cur = ytPlayer.getCurrentTime();
+      ytPlayer.seekTo(Math.max(0, cur - 10), true);
+    });
+  }
+
+  // Forward 10s
+  if (forwardBtn) {
+    forwardBtn.addEventListener('click', () => {
+      if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+      const cur = ytPlayer.getCurrentTime();
+      ytPlayer.seekTo(cur + 10, true);
+    });
+  }
+
+  // Speed selection
+  if (speedSelect) {
+    speedSelect.addEventListener('change', (e) => {
+      if (!ytPlayer || typeof ytPlayer.setPlaybackRate !== 'function') return;
+      ytPlayer.setPlaybackRate(parseFloat(e.target.value));
+    });
+  }
+
+  // Loop toggle
+  if (loopBtn && loopLabel) {
+    loopBtn.addEventListener('click', () => {
+      isLooping = !isLooping;
+      if (isLooping) {
+        loopBtn.classList.add('bg-hairline-soft', 'border-ink/40', 'text-ink');
+        loopLabel.textContent = 'Loop: On';
+        showToast('Video loop enabled');
+      } else {
+        loopBtn.classList.remove('bg-hairline-soft', 'border-ink/40', 'text-ink');
+        loopLabel.textContent = 'Loop';
+        showToast('Video loop disabled');
+      }
+    });
+  }
+
+  // Theater Mode
+  if (theaterBtn && playerContainerWrapper) {
+    theaterBtn.addEventListener('click', () => {
+      isTheater = !isTheater;
+      if (isTheater) {
+        playerContainerWrapper.classList.remove('max-w-4xl');
+        playerContainerWrapper.classList.add('max-w-6xl');
+        theaterBtn.classList.add('bg-hairline-soft', 'border-ink/40', 'text-ink');
+      } else {
+        playerContainerWrapper.classList.remove('max-w-6xl');
+        playerContainerWrapper.classList.add('max-w-4xl');
+        theaterBtn.classList.remove('bg-hairline-soft', 'border-ink/40', 'text-ink');
+      }
+    });
+  }
+
+  // Cinema Ambient Dimmer
+  if (cinemaBtn && ambientGlow) {
+    cinemaBtn.addEventListener('click', () => {
+      isCinema = !isCinema;
+      document.documentElement.classList.toggle('cinema-mode', isCinema);
+      if (isCinema) {
+        ambientGlow.classList.remove('hidden');
+        cinemaBtn.classList.add('bg-hairline-soft', 'border-ink/40', 'text-ink');
+        showToast('Cinema mode enabled. Press "c" to exit.');
+      } else {
+        ambientGlow.classList.add('hidden');
+        cinemaBtn.classList.remove('bg-hairline-soft', 'border-ink/40', 'text-ink');
+      }
+    });
+  }
+
+  // Share Clean Link
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const shareUrl = window.location.href;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast('Clean distraction-free link copied to clipboard!');
+      }).catch(() => {
+        showToast('Link: ' + shareUrl);
+      });
+    });
+  }
+
+  // Productivity Dock Tabs
+  function switchTab(target) {
+    [tabTimer, tabNotes, tabHistory].forEach(t => {
+      t.classList.remove('active', 'bg-hairline-soft', 'font-medium', 'text-ink');
+      t.classList.add('bg-canvas', 'font-normal', 'text-body');
+    });
+    [panelTimer, panelNotes, panelHistory].forEach(p => p.classList.add('hidden'));
+
+    if (target === 'timer') {
+      tabTimer.classList.add('active', 'bg-hairline-soft', 'font-medium', 'text-ink');
+      panelTimer.classList.remove('hidden');
+    } else if (target === 'notes') {
+      tabNotes.classList.add('active', 'bg-hairline-soft', 'font-medium', 'text-ink');
+      panelNotes.classList.remove('hidden');
+      updateNotesTimestamps();
+    } else if (target === 'history') {
+      tabHistory.classList.add('active', 'bg-hairline-soft', 'font-medium', 'text-ink');
+      panelHistory.classList.remove('hidden');
+      renderHistory();
+    }
+  }
+
+  if (tabTimer) tabTimer.addEventListener('click', () => switchTab('timer'));
+  if (tabNotes) tabNotes.addEventListener('click', () => switchTab('notes'));
+  if (tabHistory) tabHistory.addEventListener('click', () => switchTab('history'));
+
+  // Focus Timer Logic
+  function updateTimerUI() {
+    if (!timerDisplay) return;
+    const m = Math.floor(timerRemainingSeconds / 60);
+    const s = timerRemainingSeconds % 60;
+    timerDisplay.textContent = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+  }
+
+  function playSoftChime() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.2);
+    } catch (e) {
+      // AudioContext may be restricted by autoplay policy
+    }
+  }
+
+  if (timerToggleBtn) {
+    timerToggleBtn.addEventListener('click', () => {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        timerToggleBtn.textContent = 'Resume Timer';
+        timerStatus.textContent = 'Paused';
+      } else {
+        isTimerRunning = true;
+        timerToggleBtn.textContent = 'Pause Timer';
+        timerStatus.textContent = 'Focusing...';
+        timerInterval = setInterval(() => {
+          if (timerRemainingSeconds > 0) {
+            timerRemainingSeconds--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerToggleBtn.textContent = 'Start Timer';
+            timerStatus.textContent = 'Session complete!';
+            playSoftChime();
+            showToast('Focus session complete. Take a 5-minute break!');
+          }
+        }, 1000);
+      }
+    });
+  }
+
+  if (timerResetBtn) {
+    timerResetBtn.addEventListener('click', () => {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerRemainingSeconds = 25 * 60;
+      updateTimerUI();
+      timerToggleBtn.textContent = 'Start Timer';
+      timerStatus.textContent = 'Reset to 25:00';
+    });
+  }
+
+  timerPresets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mins = parseInt(btn.getAttribute('data-minutes') || '25', 10);
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerRemainingSeconds = mins * 60;
+      updateTimerUI();
+      timerToggleBtn.textContent = 'Start Timer';
+      timerStatus.textContent = `Set to ${mins}m`;
+    });
+  });
+
+  // Notes & Timestamps Logic
+  function loadNotes(videoId) {
+    if (!notesTextarea) return;
+    if (!videoId) {
+      notesTextarea.value = '';
+      return;
+    }
+    const saved = localStorage.getItem(`tubecalm_notes_${videoId}`) || '';
+    notesTextarea.value = saved;
+    updateNotesTimestamps();
+  }
+
+  if (notesTextarea) {
+    notesTextarea.addEventListener('input', () => {
+      if (currentVideoId) {
+        localStorage.setItem(`tubecalm_notes_${currentVideoId}`, notesTextarea.value);
+        updateNotesTimestamps();
+      }
+    });
+  }
+
+  // Update real-time timestamp indicator
+  setInterval(() => {
+    if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function' && currentTsLabel) {
+      try {
+        const cur = ytPlayer.getCurrentTime();
+        currentTsLabel.textContent = `[${formatTime(cur)}]`;
+      } catch (e) {}
+    }
+  }, 1000);
+
+  if (insertTsBtn && notesTextarea) {
+    insertTsBtn.addEventListener('click', () => {
+      if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+      const cur = ytPlayer.getCurrentTime();
+      const tsTag = `[${formatTime(cur)}] `;
+      const start = notesTextarea.selectionStart;
+      const end = notesTextarea.selectionEnd;
+      const text = notesTextarea.value;
+      notesTextarea.value = text.substring(0, start) + tsTag + text.substring(end);
+      notesTextarea.focus();
+      notesTextarea.selectionStart = notesTextarea.selectionEnd = start + tsTag.length;
+      if (currentVideoId) {
+        localStorage.setItem(`tubecalm_notes_${currentVideoId}`, notesTextarea.value);
+      }
+      updateNotesTimestamps();
+      showToast(`Inserted timestamp ${tsTag.trim()}`);
+    });
+  }
+
+  if (copyNotesBtn && notesTextarea) {
+    copyNotesBtn.addEventListener('click', () => {
+      if (!notesTextarea.value.trim()) {
+        showToast('No notes to copy.');
+        return;
+      }
+      navigator.clipboard.writeText(notesTextarea.value).then(() => {
+        showToast('Notes copied to clipboard!');
+      });
+    });
+  }
+
+  function updateNotesTimestamps() {
+    if (!notesTextarea || !notesPreviewContainer || !notesTimestampsList) return;
+    const text = notesTextarea.value;
+    const matches = text.match(/\[(\d{1,2}:\d{2}(?::\d{2})?)\]/g);
+    if (!matches || matches.length === 0) {
+      notesPreviewContainer.classList.add('hidden');
+      return;
+    }
+    notesPreviewContainer.classList.remove('hidden');
+    notesTimestampsList.innerHTML = '';
+    const unique = [...new Set(matches)];
+    unique.forEach(tag => {
+      const cleanTs = tag.replace('[', '').replace(']', '');
+      const parts = cleanTs.split(':').map(Number);
+      let sec = 0;
+      if (parts.length === 3) sec = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      else if (parts.length === 2) sec = parts[0] * 60 + parts[1];
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rounded-[6px] border border-hairline bg-canvas px-2 py-0.5 font-mono text-[11px] text-body hover:text-ink hover:border-body/40';
+      btn.textContent = tag;
+      btn.title = `Jump player to ${tag}`;
+      btn.addEventListener('click', () => {
+        if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+          ytPlayer.seekTo(sec, true);
+          showToast(`Jumped to ${cleanTs}`);
+        }
+      });
+      notesTimestampsList.appendChild(btn);
+    });
+  }
+
+  // Local Watch History
+  function saveToHistory(parsed) {
+    try {
+      const historyRaw = localStorage.getItem('tubecalm_history');
+      let history = historyRaw ? JSON.parse(historyRaw) : [];
+      const item = {
+        id: parsed.videoId || parsed.playlistId,
+        type: parsed.type,
+        videoId: parsed.videoId,
+        playlistId: parsed.playlistId,
+        cleanUrl: parsed.cleanUrl,
+        date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      };
+      // Filter out duplicate if present
+      history = history.filter(h => h.id !== item.id);
+      // Prepend to top
+      history.unshift(item);
+      // Limit to 12 recent items
+      if (history.length > 12) history = history.slice(0, 12);
+      localStorage.setItem('tubecalm_history', JSON.stringify(history));
+    } catch (e) {
+      console.warn('Failed saving history', e);
+    }
+  }
+
+  function renderHistory() {
+    if (!historyList || !historyEmpty) return;
+    try {
+      const historyRaw = localStorage.getItem('tubecalm_history');
+      const history = historyRaw ? JSON.parse(historyRaw) : [];
+      if (history.length === 0) {
+        historyList.innerHTML = '';
+        historyEmpty.classList.remove('hidden');
+        return;
+      }
+      historyEmpty.classList.add('hidden');
+      historyList.innerHTML = '';
+      history.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'group flex items-center justify-between rounded-lg border border-hairline bg-canvas p-2.5 transition-colors hover:border-body/40 cursor-pointer';
+        
+        let thumb = '';
+        if (item.videoId) {
+          thumb = `<img src="https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg" alt="" class="h-10 w-16 shrink-0 rounded object-cover border border-hairline" loading="lazy" />`;
+        } else {
+          thumb = `<div class="h-10 w-16 shrink-0 rounded bg-hairline-soft border border-hairline flex items-center justify-center font-mono text-[10px] text-mute">Playlist</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            ${thumb}
+            <div class="overflow-hidden">
+              <span class="block truncate font-mono text-[12px] text-ink group-hover:underline">${item.videoId || item.playlistId}</span>
+              <span class="block font-mono text-[10px] text-mute">${item.type} • ${item.date}</span>
+            </div>
+          </div>
+          <button type="button" class="shrink-0 p-1 text-mute hover:text-ink" title="Play">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            </svg>
+          </button>
+        `;
+
+        card.addEventListener('click', () => {
+          if (input) input.value = item.cleanUrl;
+          const parsed = parseYouTubeUrl(item.cleanUrl);
+          loadVideoOrPlaylist(parsed);
+        });
+
+        historyList.appendChild(card);
+      });
+    } catch (e) {
+      console.warn('Failed rendering history', e);
+    }
+  }
+
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', () => {
+      localStorage.removeItem('tubecalm_history');
+      renderHistory();
+      showToast('Watch history cleared from device.');
+    });
+  }
+
+  // Keyboard Shortcuts Handling
+  window.addEventListener('keydown', (e) => {
+    // If user is actively typing in an input or textarea, ignore shortcuts
+    const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+    if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+      return;
+    }
+
+    if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      e.preventDefault();
+      if (shortcutsModal) {
+        if (shortcutsModal.open) shortcutsModal.close();
+        else shortcutsModal.showModal();
+      }
+      return;
+    }
+
+    if (e.key === ' ' || e.key === 'k') {
+      e.preventDefault();
+      if (playPauseBtn) playPauseBtn.click();
+    } else if (e.key === 'ArrowLeft' || e.key === 'j') {
+      e.preventDefault();
+      if (rewindBtn) rewindBtn.click();
+    } else if (e.key === 'ArrowRight' || e.key === 'l') {
+      e.preventDefault();
+      if (forwardBtn) forwardBtn.click();
+    } else if (e.key === 'm') {
+      if (ytPlayer && typeof ytPlayer.isMuted === 'function') {
+        if (ytPlayer.isMuted()) ytPlayer.unMute();
+        else ytPlayer.mute();
+        showToast(ytPlayer.isMuted() ? 'Muted' : 'Unmuted');
+      }
+    } else if (e.key === 't') {
+      if (theaterBtn) theaterBtn.click();
+    } else if (e.key === 'c') {
+      if (cinemaBtn) cinemaBtn.click();
+    } else if (e.key === 'f') {
+      const target = document.getElementById('player-container-wrapper');
+      if (target) {
+        if (!document.fullscreenElement) target.requestFullscreen().catch(() => {});
+        else document.exitFullscreen().catch(() => {});
+      }
+    }
+  });
+
+  // Modal event listeners
+  if (shortcutsBtn && shortcutsModal) {
+    shortcutsBtn.addEventListener('click', () => shortcutsModal.showModal());
+  }
+  if (closeShortcutsModal && shortcutsModal) {
+    closeShortcutsModal.addEventListener('click', () => shortcutsModal.close());
+  }
+  if (modalDoneBtn && shortcutsModal) {
+    modalDoneBtn.addEventListener('click', () => shortcutsModal.close());
+  }
+
+  // Check URL query parameters (?v=... or ?list=...) on initial page load
+  function checkUrlParamsAndLoad() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const v = urlParams.get('v');
+    const list = urlParams.get('list');
+    const t = urlParams.get('t');
+
+    if (v || list) {
+      let combined = '';
+      if (v && list) combined = `https://www.youtube.com/watch?v=${v}&list=${list}`;
+      else if (v) combined = `https://www.youtube.com/watch?v=${v}`;
+      else if (list) combined = `https://www.youtube.com/playlist?list=${list}`;
+
+      if (t) combined += (combined.includes('?') ? '&' : '?') + `t=${t}`;
+
+      if (input) input.value = combined;
+      const parsed = parseYouTubeUrl(combined);
+      if (parsed.isValid) {
+        loadVideoOrPlaylist(parsed);
+      }
+    }
+  }
+
+  // Initialize
+  initYouTubeApi();
+</script>
+
+<style>
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+</style>
+

@@ -1,0 +1,101 @@
+---
+// src/pages/about.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="About TubeCalm — The Philosophy of Distraction-Free Video"
+  description="Why we built TubeCalm: Reclaiming our attention from algorithmic rabbit holes and engagement traps."
+  currentPath="/about"
+>
+  <div class="geist-mesh w-full border-b border-hairline py-16 sm:py-24">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas-elevated/80 px-3 py-1 text-mute shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+        <span class="font-mono text-[11px] font-medium uppercase tracking-[0.08em]">Our Manifesto</span>
+      </div>
+
+      <h1 class="font-sans text-3xl sm:text-5xl font-semibold tracking-[-2px] text-ink leading-tight">
+        An intentional space for video on the web.
+      </h1>
+
+      <p class="mt-6 text-[16px] leading-relaxed text-body sm:text-[18px]">
+        YouTube is the world’s most comprehensive repository of human knowledge, lectures, tutorials, music, and documentary filmmaking. But it was architected as an engagement engine designed to keep you watching for hours after your intended video has ended.
+      </p>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <!-- Story Sections -->
+    <div class="space-y-12 text-[15px] leading-relaxed text-body">
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">
+          The Problem: The Algorithmic Slippery Slope
+        </h2>
+        <p>
+          You opened YouTube with a singular intention: <em>“I need to understand how Dijkstra’s algorithm works”</em> or <em>“I want to follow this 20-minute yoga routine.”</em>
+        </p>
+        <p>
+          Yet before the video even starts, the homepage suggests dozens of sensationalized headlines. In the sidebar, infinite thumbnails fight for your peripheral vision. When the video concludes, autoplay immediately begins or a grid of clickbait cards covers the player. An hour disappears, leaving you drained and off-track.
+        </p>
+      </section>
+
+      <!-- The Core Pillars -->
+      <section class="space-y-6">
+        <h2 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">
+          Our Three Guiding Principles
+        </h2>
+
+        <div class="space-y-4">
+          <div class="rounded-xl border border-hairline bg-canvas-elevated p-6 shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+            <span class="font-mono text-[11px] font-medium uppercase tracking-wider text-mute">Principle 01</span>
+            <h3 class="mt-1 font-sans text-[17px] font-semibold text-ink">Zero Algorithmic Interference</h3>
+            <p class="mt-2 text-[14px] text-body">
+              TubeCalm will never recommend videos to you. There is no feed, no "Up Next", and no "You might also like". You arrive with a specific link, you watch what you intended, and you leave peacefully.
+            </p>
+          </div>
+
+          <div class="rounded-xl border border-hairline bg-canvas-elevated p-6 shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+            <span class="font-mono text-[11px] font-medium uppercase tracking-wider text-mute">Principle 02</span>
+            <h3 class="mt-1 font-sans text-[17px] font-semibold text-ink">Zero Setup Friction</h3>
+            <p class="mt-2 text-[14px] text-body">
+              You should not have to download an untrusted browser extension or manage complicated adblock filters just to watch a clean lecture. TubeCalm works instantly in any web browser, on phones, tablets, smart TVs, or school Chromebooks.
+            </p>
+          </div>
+
+          <div class="rounded-xl border border-hairline bg-canvas-elevated p-6 shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+            <span class="font-mono text-[11px] font-medium uppercase tracking-wider text-mute">Principle 03</span>
+            <h3 class="mt-1 font-sans text-[17px] font-semibold text-ink">Absolute Privacy Respect</h3>
+            <p class="mt-2 text-[14px] text-body">
+              We do not track your habits, log your video views, or store personal profiles on remote servers. Anything you save—such as notes or recent history—stays strictly inside your local browser.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why not just an extension? -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">
+          Why a Web Utility Instead of an Extension?
+        </h2>
+        <p>
+          Browser extensions are powerful, but they have major limitations: they require permissions to read all data on websites you visit, they don’t work on mobile Safari or mobile Chrome, and students or corporate workers cannot install extensions on managed Chromebooks or work laptops.
+        </p>
+        <p>
+          TubeCalm is accessible anywhere with a single click. Simply paste a URL or send a TubeCalm link to a friend or student, and they get an immediate, distraction-free viewing experience.
+        </p>
+      </section>
+
+      <!-- Call to Action Band -->
+      <div class="rounded-xl border border-hairline bg-canvas-elevated p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <h3 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">Ready to watch distraction-free?</h3>
+        <p class="mt-2 text-[14px] text-body">No signup, no extension, no fee. Paste any video or playlist link.</p>
+        <div class="mt-6">
+          <a href="/" class="inline-flex h-10 items-center justify-center rounded-full bg-ink px-6 text-[14px] font-medium text-canvas-elevated transition-opacity hover:opacity-90">
+            Open TubeCalm Player
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+

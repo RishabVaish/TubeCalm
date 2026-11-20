@@ -1,0 +1,140 @@
+---
+// src/pages/privacy.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="Privacy Policy & Manifesto — TubeCalm"
+  description="TubeCalm is a privacy-first, client-only web utility. We do not use tracking cookies, analytics, or remote database logging."
+  currentPath="/privacy"
+>
+  <div class="geist-mesh w-full border-b border-hairline py-16 sm:py-24">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas-elevated/80 px-3 py-1 text-mute shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+        <span class="font-mono text-[11px] font-medium uppercase tracking-[0.08em]">Privacy Manifesto</span>
+      </div>
+
+      <h1 class="font-sans text-3xl sm:text-5xl font-semibold tracking-[-2px] text-ink leading-tight">
+        Your attention is yours. So is your privacy.
+      </h1>
+
+      <p class="mt-6 text-[16px] leading-relaxed text-body sm:text-[18px]">
+        TubeCalm was engineered from the ground up without user accounts, server-side databases, behavioral telemetry, or tracking scripts.
+      </p>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <div class="space-y-10 text-[15px] leading-relaxed text-body">
+      <!-- 1. The Core Architecture -->
+      <section class="space-y-3">
+        <h2 class="font-sans text-xl font-semibold tracking-[-0.6px] text-ink">
+          1. 100% Client-Side Architecture
+        </h2>
+        <p>
+          When you paste a YouTube URL into TubeCalm, that link is parsed and evaluated entirely within your own browser via client-side JavaScript. We do not transmit the URLs you enter to any TubeCalm servers, nor do we build a profile of what you watch.
+        </p>
+      </section>
+
+      <!-- 2. Browser Storage (localStorage) -->
+      <section class="space-y-3">
+        <h2 class="font-sans text-xl font-semibold tracking-[-0.6px] text-ink">
+          2. How We Use Browser Storage
+        </h2>
+        <p>
+          To make TubeCalm convenient and useful for studying, we utilize your browser’s standard <code>localStorage</code> API for the following optional features:
+        </p>
+        <ul class="list-disc space-y-2 pl-6 text-[14px]">
+          <li><strong>Recent History (<code>tubecalm_history</code>):</strong> Stores the video ID, type, and date of your recently watched items so you can quickly resume them without finding the link again.</li>
+          <li><strong>Timestamped Notes (<code>tubecalm_notes_[videoId]</code>):</strong> Stores your personal notes written in the study scratchpad.</li>
+          <li><strong>Theme Preference (<code>tubecalm_theme</code>):</strong> Remembers whether you prefer Dark or Light mode.</li>
+        </ul>
+        <p class="text-[14px] text-mute">
+          This data never leaves your device. It is never uploaded to the cloud or shared with third parties.
+        </p>
+      </section>
+
+      <!-- Privacy Action Card: 1-Click Data Purge -->
+      <div class="rounded-xl border border-hairline bg-canvas-elevated p-6 shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+        <h3 class="font-sans text-[16px] font-semibold text-ink">Instant Privacy Control</h3>
+        <p class="mt-1 text-[13px] text-body">
+          You can wipe all locally stored data from this browser immediately with the button below:
+        </p>
+        <div class="mt-4 flex items-center gap-3">
+          <button
+            id="wipe-all-data-btn"
+            type="button"
+            class="rounded-[6px] border border-red-300 bg-red-50 px-3 py-1.5 font-mono text-[12px] font-medium text-red-700 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+          >
+            Wipe All Local Storage Data
+          </button>
+          <span id="wipe-status" class="font-mono text-[12px] text-mute"></span>
+        </div>
+      </div>
+
+      <!-- 3. Third-Party Services (YouTube Embedded Player) -->
+      <section class="space-y-3">
+        <h2 class="font-sans text-xl font-semibold tracking-[-0.6px] text-ink">
+          3. YouTube IFrame Player & Google Services
+        </h2>
+        <p>
+          TubeCalm uses the official YouTube IFrame Player API to render video streams. When the player loads, it communicates directly between your web browser and YouTube's servers to stream video and audio.
+        </p>
+        <p>
+          Google’s standard privacy policies and terms apply to the embedded YouTube player. We configure the player parameters to minimize branding and disable third-party annotations (<code>iv_load_policy: 3</code>) and related recommendations (<code>rel: 0</code>).
+        </p>
+      </section>
+
+      <!-- 4. Zero Cookies & Zero Third-Party Trackers -->
+      <section class="space-y-3">
+        <h2 class="font-sans text-xl font-semibold tracking-[-0.6px] text-ink">
+          4. Zero Advertising Networks & Trackers
+        </h2>
+        <p>
+          TubeCalm contains:
+        </p>
+        <ul class="list-disc space-y-1.5 pl-6 text-[14px]">
+          <li>No Facebook / Meta pixels</li>
+          <li>No Google Analytics or marketing tags</li>
+          <li>No tracking cookies or advertising SDKs</li>
+          <li>No data brokers or monetization trackers</li>
+        </ul>
+      </section>
+
+      <!-- 5. Contact -->
+      <section class="space-y-3">
+        <h2 class="font-sans text-xl font-semibold tracking-[-0.6px] text-ink">
+          5. Contact & Questions
+        </h2>
+        <p>
+          If you have any questions regarding privacy or want to report an issue, feel free to visit our <a href="/faq" class="text-ink underline decoration-hairline hover:decoration-ink">FAQ</a> or open an issue on our project repository.
+        </p>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const wipeBtn = document.getElementById('wipe-all-data-btn');
+  const wipeStatus = document.getElementById('wipe-status');
+
+  if (wipeBtn && wipeStatus) {
+    wipeBtn.addEventListener('click', () => {
+      try {
+        localStorage.removeItem('tubecalm_history');
+        localStorage.removeItem('tubecalm_theme');
+        // Clear all notes keys
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('tubecalm_notes_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        wipeStatus.textContent = '✓ All TubeCalm data cleared!';
+        wipeStatus.className = 'font-mono text-[12px] text-emerald-600 dark:text-emerald-400';
+      } catch (err) {
+        wipeStatus.textContent = 'Error clearing storage.';
+      }
+    });
+  }
+</script>
+

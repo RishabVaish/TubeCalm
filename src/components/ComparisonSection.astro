@@ -1,0 +1,125 @@
+---
+// src/components/ComparisonSection.astro
+---
+
+<section class="w-full border-b border-hairline py-16 sm:py-24 transition-colors">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="mb-12 max-w-2xl">
+      <span class="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-mute">
+        Honest Comparison
+      </span>
+      <h2 class="mt-2 font-sans text-2xl sm:text-3xl font-semibold tracking-[-1.28px] text-ink">
+        How TubeCalm compares to other alternatives.
+      </h2>
+      <p class="mt-3 text-[14px] leading-relaxed text-body">
+        We evaluated existing tools like Unhook, Purify.video, and NoSuggest to build the cleanest, fastest, and most accessible distraction-free viewing experience.
+      </p>
+    </div>
+
+    <!-- Comparison Table Card -->
+    <div class="overflow-x-auto rounded-xl border border-hairline bg-canvas-elevated shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+      <table class="w-full border-collapse text-left text-[13px]">
+        <thead>
+          <tr class="border-b border-hairline bg-hairline-soft/40">
+            <th class="p-4 font-mono text-[11px] font-medium uppercase tracking-wider text-mute">Feature / Capability</th>
+            <th class="p-4 font-sans text-[14px] font-semibold text-ink bg-hairline-soft/80">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                TubeCalm
+              </span>
+            </th>
+            <th class="p-4 font-mono text-[12px] font-medium text-body">Unhook.app</th>
+            <th class="p-4 font-mono text-[12px] font-medium text-body">Purify.video</th>
+            <th class="p-4 font-mono text-[12px] font-medium text-body">NoSuggest.com</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          <!-- Row 1: Zero Installation -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              Works Instantly (No Extension / App Needed)
+              <span class="block text-[11px] font-normal text-mute">Open in any browser: mobile, iPad, desktop, TV</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ Yes (100% Web)
+            </td>
+            <td class="p-4 text-mute">✗ Requires browser extension</td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Web</td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Web / PWA</td>
+          </tr>
+
+          <!-- Row 2: URL & Playlist Engine -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              Full URL & Playlist Support
+              <span class="block text-[11px] font-normal text-mute">Handles video IDs, playlists, timestamps, and Shorts</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ All formats + Shorts auto-conversion
+            </td>
+            <td class="p-4 text-body">Toggles on native YouTube</td>
+            <td class="p-4 text-mute">✗ Fragile / Often breaks</td>
+            <td class="p-4 text-mute">✗ Manual channel setup required</td>
+          </tr>
+
+          <!-- Row 3: Account Requirement -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              No Mandatory Signups or Database
+              <span class="block text-[11px] font-normal text-mute">Zero friction; no email or password needed</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ 100% Anonymous
+            </td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Local extension storage</td>
+            <td class="p-4 text-mute">✗ Often gates or asks signups</td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Local storage</td>
+          </tr>
+
+          <!-- Row 4: Study Companion Tools -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              Built-in Focus & Note Tools
+              <span class="block text-[11px] font-normal text-mute">Pomodoro timer, timestamped notes scratchpad, ambient dimmer</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ Included & Saved locally
+            </td>
+            <td class="p-4 text-mute">✗ Not included</td>
+            <td class="p-4 text-mute">✗ Not included</td>
+            <td class="p-4 text-mute">✗ Not included</td>
+          </tr>
+
+          <!-- Row 5: Privacy & Tracking -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              Zero Tracking Cookies & Zero Third-Party Ads
+              <span class="block text-[11px] font-normal text-mute">No ad network tracking or data monetization</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ Verified clean
+            </td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Clean</td>
+            <td class="p-4 text-mute">✗ Third-party ad trackers</td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Clean</td>
+          </tr>
+
+          <!-- Row 6: Official YouTube Player API -->
+          <tr class="transition-colors hover:bg-hairline-soft/20">
+            <td class="p-4 font-medium text-ink">
+              Official YouTube IFrame Player
+              <span class="block text-[11px] font-normal text-mute">Respects creator views, video quality, and subtitles</span>
+            </td>
+            <td class="p-4 font-medium text-emerald-600 dark:text-emerald-400 bg-hairline-soft/40">
+              ✓ Official IFrame API
+            </td>
+            <td class="p-4 text-body">CSS hiding on native site</td>
+            <td class="p-4 text-body">Generic embed</td>
+            <td class="p-4 text-emerald-600 dark:text-emerald-400">✓ Official embed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+

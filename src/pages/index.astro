@@ -1,11 +1,30 @@
 ---
-import Welcome from '../components/Welcome.astro';
+// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import HeroSection from '../components/HeroSection.astro';
+import PlayerApp from '../components/PlayerApp.astro';
+import FeaturesGrid from '../components/FeaturesGrid.astro';
+import ComparisonSection from '../components/ComparisonSection.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
 ---
 
-<Layout>
-	<Welcome />
+<Layout 
+  title="TubeCalm — Distraction-Free YouTube Utility"
+  description="Paste any YouTube video or playlist URL and watch distraction-free. No recommendations, Shorts, toxic comments, or algorithms."
+  currentPath="/"
+>
+  <!-- Hero Banner with Geist Mesh Gradient -->
+  <HeroSection />
+
+  <!-- Core Interactive Player Application -->
+  <PlayerApp />
+
+  <!-- Features Grid -->
+  <FeaturesGrid />
+
+  <!-- Competitor Comparison (Unhook vs Purify vs NoSuggest vs TubeCalm) -->
+  <ComparisonSection />
+
+  <!-- FAQ Accordion -->
+  <FaqAccordion />
 </Layout>

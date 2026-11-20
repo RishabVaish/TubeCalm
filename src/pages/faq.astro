@@ -1,0 +1,124 @@
+---
+// src/pages/faq.astro
+import Layout from '../layouts/Layout.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+---
+
+<Layout 
+  title="FAQ & Keyboard Shortcuts Guide — TubeCalm"
+  description="Frequently asked questions, keyboard shortcuts cheat-sheet, and guide for TubeCalm."
+  currentPath="/faq"
+>
+  <div class="geist-mesh w-full border-b border-hairline py-16 sm:py-24">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas-elevated/80 px-3 py-1 text-mute shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+        <span class="font-mono text-[11px] font-medium uppercase tracking-[0.08em]">Help & Documentation</span>
+      </div>
+
+      <h1 class="font-sans text-3xl sm:text-5xl font-semibold tracking-[-2px] text-ink leading-tight">
+        Frequently Asked Questions
+      </h1>
+
+      <p class="mt-6 text-[16px] leading-relaxed text-body sm:text-[18px]">
+        Everything you need to know about using TubeCalm, URL formats, keyboard shortcuts, and classroom usage.
+      </p>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 space-y-16">
+    <!-- Keyboard Shortcuts Reference Card -->
+    <section>
+      <div class="mb-4">
+        <span class="font-mono text-[11px] font-medium uppercase tracking-wider text-mute">Quick Reference</span>
+        <h2 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">Keyboard Shortcuts</h2>
+        <p class="mt-1 text-[14px] text-body">Control playback without reaching for the mouse or leaving full focus.</p>
+      </div>
+
+      <div class="overflow-hidden rounded-xl border border-hairline bg-canvas-elevated shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+        <table class="w-full text-left text-[13px]">
+          <tbody class="divide-y divide-hairline">
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Play / Pause</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">Space</kbd> or <kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">k</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Seek Backwards 10s</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">←</kbd> or <kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">j</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Seek Forwards 10s</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">→</kbd> or <kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">l</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Mute / Unmute Audio</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">m</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Toggle Theater View</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">t</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Toggle Cinema Ambient Dimmer</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">c</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Toggle Fullscreen</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">f</kbd></td>
+            </tr>
+            <tr class="flex items-center justify-between p-3.5">
+              <td class="font-medium text-ink">Open Shortcuts Cheat-Sheet</td>
+              <td><kbd class="rounded border border-hairline bg-canvas px-2 py-1 font-mono text-[11px] text-mute">?</kbd></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Supported URL Formats Card -->
+    <section>
+      <div class="mb-4">
+        <span class="font-mono text-[11px] font-medium uppercase tracking-wider text-mute">URL Compatibility</span>
+        <h2 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">Supported URL Formats</h2>
+        <p class="mt-1 text-[14px] text-body">TubeCalm’s parser handles all common YouTube link schemes.</p>
+      </div>
+
+      <div class="space-y-2.5">
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-3">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-mute">Standard Watch URL</span>
+          <code class="block font-mono text-[12px] text-ink mt-0.5">https://www.youtube.com/watch?v=dQw4w9WgXcQ</code>
+        </div>
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-3">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-mute">Shortened Link with Timestamp</span>
+          <code class="block font-mono text-[12px] text-ink mt-0.5">https://youtu.be/dQw4w9WgXcQ?t=1m30s</code>
+        </div>
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-3">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-mute">YouTube Shorts (Auto-converted to landscape)</span>
+          <code class="block font-mono text-[12px] text-ink mt-0.5">https://www.youtube.com/shorts/3jz_24q1_hA</code>
+        </div>
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-3">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-mute">Full Playlists</span>
+          <code class="block font-mono text-[12px] text-ink mt-0.5">https://www.youtube.com/playlist?list=PLrAXtmErZgOdP_8GztsuKi9nv7Q_s4nK9</code>
+        </div>
+        <div class="rounded-lg border border-hairline bg-canvas-elevated p-3">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-mute">Direct Video or Playlist ID</span>
+          <code class="block font-mono text-[12px] text-ink mt-0.5">dQw4w9WgXcQ</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Accordion Section -->
+    <FaqAccordion />
+
+    <!-- CTA Section -->
+    <div class="rounded-xl border border-hairline bg-canvas-elevated p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <h3 class="font-sans text-2xl font-semibold tracking-[-0.8px] text-ink">Ready to start?</h3>
+      <p class="mt-2 text-[14px] text-body">Paste any YouTube video or playlist link and watch with complete peace of mind.</p>
+      <div class="mt-6">
+        <a href="/" class="inline-flex h-10 items-center justify-center rounded-full bg-ink px-6 text-[14px] font-medium text-canvas-elevated transition-opacity hover:opacity-90">
+          Go to TubeCalm Player
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
